@@ -1,0 +1,125 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "authorship_tag": "ABX9TyMNbAG0wjiJKkjdL9M/ZAV5",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/krishnaraj30/ml1/blob/main/electric%20fault%20detection\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "id": "1fkCsnzR9xtz"
+      },
+      "outputs": [],
+      "source": [
+        "import pandas as pd\n",
+        "import numpy as np\n",
+        "import matplotlib.pyplot as plt\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "from sklearn.metrics import confusion_matrix, accuracy_score\n",
+        "from sklearn.preprocessing import LabelEncoder\n",
+        "from sklearn.compose import ColumnTransformer\n",
+        "from sklearn.preprocessing import OneHotEncoder\n",
+        "from keras.utils import np_utils\n",
+        "from tensorflow.keras.layers import Dense\n",
+        "from tensorflow.keras.models import Sequential\n",
+        "!unzip '/content/drive/MyDrive/Datasets/faults.zip' -d '/content'\n",
+        "detectionData = pd.read_csv('detect_dataset.csv')\n",
+        "detectionData.head()\n",
+        "detectionData.drop(['Unnamed: 7', 'Unnamed: 8'], axis='columns' ,inplace=True)\n",
+        "detectionData.shape\n",
+        "detectionData.head()\n",
+        "detectionData.drop(['Unnamed: 7', 'Unnamed: 8'], axis='columns' ,inplace=True)\n",
+        "detectionData.shape\n",
+        "detectionData.head()\n",
+        "detectionData['Output (S)'].value_counts()\n",
+        "Xdetection = detectionData.iloc[:, 1:].values\n",
+        "ydetection = detectionData.iloc[:, 0].values\n",
+        "Xd_train, Xd_test, yd_train, yd_test = train_test_split(Xdetection, ydetection, test_size = 0.2, random_state = 0)\n",
+        "sc = StandardScaler()\n",
+        "Xd_train = sc.fit_transform(Xd_train)\n",
+        "Xd_test = sc.transform(Xd_test)\n",
+        "sc = StandardScaler()\n",
+        "Xd_train = sc.fit_transform(Xd_train)\n",
+        "Xd_test = sc.transform(Xd_test)\n",
+        "detectionANN.fit(Xd_train, yd_train, batch_size = 32, epochs = 100)\n",
+        "yd_pred = detectionANN.predict(Xd_test)\n",
+        "yd_pred = (yd_pred > 0.5)\n",
+        "print(np.concatenate((yd_pred.reshape(len(yd_pred),1), yd_test.reshape(len(yd_test),1)),1))\n",
+        "yd_pred = detectionANN.predict(Xd_test)\n",
+        "yd_pred = (yd_pred > 0.5)\n",
+        "print(np.concatenate((yd_pred.reshape(len(yd_pred),1), yd_test.reshape(len(yd_test),1)),1))\n",
+        "classData = pd.read_csv('classData.csv')\n",
+        "classData.shape\n",
+        "classData.head()\n",
+        "Xclass = classData.iloc[:, 4:].values\n",
+        "yclass = classData.iloc[:, 0:4].values\n",
+        "print(Xclass[0,:])\n",
+        "print(yclass[0,:])\n",
+        "faults = [\"None\", \"LG Fault\", \"LL Fault\", \"LLG Fault\", \"LLL Fault\", \"LLLG Fault\"]\n",
+        "yc = []\n",
+        "for f in yclass:\n",
+        "  if f[0] == 0 and f[1] == 0 and f[2] == 0 and f[3] == 0:\n",
+        "    yc.append(faults[0])\n",
+        "  elif f[0] == 1 and f[1] == 0 and f[2] == 0 and f[3] == 1:\n",
+        "    yc.append(faults[1])\n",
+        "  elif f[0] == 0 and f[1] == 1 and f[2] == 1 and f[3] == 0:\n",
+        "    yc.append(faults[2])\n",
+        "  elif f[0] == 1 and f[1] == 0 and f[2] == 1 and f[3] == 1:\n",
+        "    yc.append(faults[3])\n",
+        "  elif f[0] == 0 and f[1] == 1 and f[2] == 1 and f[3] == 1:\n",
+        "    yc.append(faults[4])\n",
+        "  else:\n",
+        "    yc.append(faults[5])\n",
+        "yc = np.array(yc)\n",
+        "print(f\"No Fault : {len(yc[yc==faults[0]])}\")\n",
+        "print(f\"LF Fault : {len(yc[yc==faults[1]])}\")\n",
+        "print(f\"LL Fault : {len(yc[yc==faults[2]])}\")\n",
+        "print(f\"LLG Fault : {len(yc[yc==faults[3]])}\")\n",
+        "print(f\"LLL Fault : {len(yc[yc==faults[4]])}\")\n",
+        "print(f\"LLLG Fault : {len(yc[yc==faults[5]])}\")\n",
+        "yclass = yc\n",
+        "encoder = LabelEncoder()\n",
+        "encoder.fit(yclass)\n",
+        "encoded_Y = encoder.transform(yclass)\n",
+        "yclass = np_utils.to_categorical(encoded_Y)\n",
+        "Xc_train, Xc_test, yc_train, yc_test = train_test_split(Xclass, yclass, test_size = 0.2, random_state = 0)\n",
+        "sc = StandardScaler()\n",
+        "Xc_train = sc.fit_transform(Xc_train)\n",
+        "Xc_test = sc.transform(Xc_test)\n",
+        "classANN = Sequential()\n",
+        "classANN.add(Dense(units=12, activation='relu'))\n",
+        "classANN.add(Dense(units=12, activation='relu'))\n",
+        "classANN.add(Dense(units=6, activation='sigmoid'))\n",
+        "classANN.compile(optimizer = 'adam', loss = 'categorical_crossentropy', metrics = ['accuracy'])\n",
+        "classANN.fit(Xc_train, yc_train, batch_size = 32, epochs = 100)\n",
+        "loss, acc = classANN.evaluate(Xc_test, yc_test)\n",
+        "print(f'Accuracy : {acc*100} %')\n",
+        ""
+      ]
+    }
+  ]
+}
